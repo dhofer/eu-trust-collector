@@ -1,12 +1,13 @@
+import argparse
 import base64
 import logging
-import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import List, Tuple
-import urllib3
 from pathlib import Path
-import argparse
+from typing import List, Tuple
+
+import requests
+import urllib3
 from asn1crypto import pem, x509
 
 # Configure logging
@@ -65,7 +66,9 @@ def download_trust_list(session: requests.Session, url: str) -> ET.Element:
             return ET.fromstring(response.content)
         except Exception as e:
             delay = base_delay * (2**attempt)  # exponential backoff
-            logger.error(f"{url}: Attempt {attempt + 1}/{max_retries} failed: {e}")
+            logger.error(
+                f"{url}: Attempt {attempt + 1}/{max_retries} failed: {e}"
+            )
             if attempt < max_retries - 1:
                 logger.info(f"Retrying in {delay} seconds...")
                 time.sleep(delay)
@@ -127,18 +130,24 @@ def process_trust_list(root: ET.Element, url: str, validate: bool) -> List[str]:
                             "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/granted",
                             "http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/withdrawn",
                         ]:
-                            cert = service_info.find(".//ns1:X509Certificate", ns)
+                            cert = service_info.find(
+                                ".//ns1:X509Certificate", ns
+                            )
                             if cert is not None and cert.text:
                                 try:
                                     pem_cert = cert_to_pem(cert.text)
-                                    if not validate or validate_certificate(pem_cert):
+                                    if not validate or validate_certificate(
+                                        pem_cert
+                                    ):
                                         pem_certs.append(pem_cert)
                                     else:
                                         logger.warning(
                                             f"Certificate validation failed for {tsp_name}"
                                         )
                                 except ValueError as e:
-                                    logger.error(f"Error processing certificate: {e}")
+                                    logger.error(
+                                        f"Error processing certificate: {e}"
+                                    )
 
     return pem_certs
 
@@ -184,7 +193,9 @@ def main():
 
             try:
                 tl_root = download_trust_list(session, location)
-                pems = process_trust_list(tl_root, location, not args.no_validate)
+                pems = process_trust_list(
+                    tl_root, location, not args.no_validate
+                )
 
                 for pem in pems:
                     if pem not in seen_certs:
