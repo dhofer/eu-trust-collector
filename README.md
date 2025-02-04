@@ -4,6 +4,8 @@ A Python script that downloads all qualified trust service providers' certificat
 List of Trusted Lists (LOTL) and saves them in a PEM file. This file can be utilized for validation of PDF signatures
 with tools like [pyHanko](https://github.com/MatthiasValvekens/pyHanko).
 
+Please be aware that this is just a quick workaround until pyHanko's qualified-certs feature is available.
+
 ## Prerequisites
 
 - Python 3.x
