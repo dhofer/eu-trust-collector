@@ -1,0 +1,40 @@
+name: Weekly EU Trust Certificates Update
+
+on:
+  schedule:
+    # Run the workflow every Tuesday at 09:40 UTC
+    - cron: "40 9 * * 2"
+
+jobs:
+  update_certificates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install asn1crypto
+
+      - name: Run EU Trust Collector
+        run: python eu_trust_collector.py
+
+      - name: Commit updated certificates
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add eu-lotl.pem
+          git commit -m "Update EU-LOTL certificates"
+          git push
+        env:
+          # Prevent the script from erroring if there are no changes to commit
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+      - name: Push changes if any
+        run: git push
+        continue-on-error: true
